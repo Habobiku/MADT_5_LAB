@@ -23,10 +23,17 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        initializeViews()
+        setupEditText()
+        loadData()
+    }
 
+    private fun initializeViews() {
         listView = findViewById(R.id.listView)
         editText = findViewById(R.id.editText)
+    }
 
+    private fun setupEditText() {
         editText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable) {
                 filterCurrencies(s.toString())
@@ -36,7 +43,9 @@ class MainActivity : AppCompatActivity() {
 
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
         })
+    }
 
+    private fun loadData() {
         val parser = Parser()
         val dataLoader = DataLoader(this, parser)
         dataLoader.execute("https://www.floatrates.com/daily/usd.json")
@@ -44,7 +53,7 @@ class MainActivity : AppCompatActivity() {
 
     public fun updateUI(currencies: Map<String, Currency>) {
         this.currencies = currencies
-        this.filteredCurrencies = currencies // Initialize filteredCurrencies with all currencies
+        this.filteredCurrencies = currencies
         displayCurrencies(filteredCurrencies)
     }
 
@@ -59,4 +68,3 @@ class MainActivity : AppCompatActivity() {
         displayCurrencies(filteredCurrencies)
     }
 }
-
