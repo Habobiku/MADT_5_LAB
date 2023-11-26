@@ -13,6 +13,13 @@ import java.net.URL;
 import java.util.Map;
 
 public class DataLoader extends AsyncTask<String, Void, String> {
+    private Parser parser;
+    private MainActivity mainActivity;
+
+    public DataLoader(MainActivity mainActivity, Parser parser) {
+        this.mainActivity = mainActivity;
+        this.parser = parser;
+    }
 
     @Override
     protected String doInBackground(String... urls) {
@@ -34,12 +41,12 @@ public class DataLoader extends AsyncTask<String, Void, String> {
 
     @Override
     protected void onPostExecute(String result) {
-        Parser parser = new Parser();
         Map<String, Currency> currencies = null;
         try {
             currencies = parser.parse(result);
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        mainActivity.updateUI(currencies);
     }
 }

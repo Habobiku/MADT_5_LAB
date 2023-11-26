@@ -18,6 +18,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var editText: EditText
     private lateinit var adapter: ArrayAdapter<String>
     private lateinit var currencies: Map<String, Currency>
+    private lateinit var filteredCurrencies: Map<String, Currency>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,41 +37,26 @@ class MainActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
         })
 
-        val dataLoader = DataLoader()
+        val parser = Parser()
+        val dataLoader = DataLoader(this, parser)
         dataLoader.execute("https://www.floatrates.com/daily/usd.json")
     }
 
-    private inner class DataLoader : AsyncTask<String, Void, String>() {
-
-        override fun doInBackground(vararg urls: String): String {
-            var result = ""
-            try {
-                val url = URL(urls[0])
-                val urlConnection = url.openConnection() as HttpURLConnection
-                val inputStream = BufferedInputStream(urlConnection.inputStream)
-                result = inputStream.bufferedReader().use { it.readText() }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-            return result
-        }
-
-
-        override fun onPostExecute(result: String) {
-            val parser = Parser()
-            currencies = parser.parse(result)
-            updateUI(currencies)
-        }
+    public fun updateUI(currencies: Map<String, Currency>) {
+        this.currencies = currencies
+        this.filteredCurrencies = currencies // Initialize filteredCurrencies with all currencies
+        displayCurrencies(filteredCurrencies)
     }
 
-    private fun updateUI(currencies: Map<String, Currency>) {
+    private fun displayCurrencies(currencies: Map<String, Currency>) {
         val listItems = currencies.map { "${it.key} - ${it.value.rate}" }.toTypedArray()
         adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, listItems)
         listView.adapter = adapter
     }
 
     private fun filterCurrencies(query: String) {
-        val filteredCurrencies = currencies.filterKeys { it.contains(query, ignoreCase = true) }
-        updateUI(filteredCurrencies)
+        filteredCurrencies = currencies.filterKeys { it.contains(query, ignoreCase = true) }
+        displayCurrencies(filteredCurrencies)
     }
 }
+
